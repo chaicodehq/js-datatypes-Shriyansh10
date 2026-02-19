@@ -48,4 +48,47 @@
  */
 export function analyzeUPITransactions(transactions) {
   // Your code here
+  if (
+    transactions === null ||
+    !Array.isArray(transactions) ||
+    transactions.length == 0
+  )
+    return null;
+  const updatedTransactions = transactions.filter(
+    (transaction) =>
+      transaction.amount > 0 &&
+      (transaction.type == "credit" || transaction.type == "debit"),
+  );
+  if (updatedTransactions.length == 0) return null;
+
+  let totalCredit=0;
+  let totalDebit=0;
+  updatedTransactions.map((txn) => {
+    if (txn.type == "credit") totalCredit += txn.amount;
+    if (txn.type == "debit") totalDebit += txn.amount;
+  });
+  const netBalance = totalCredit - totalDebit;
+  const transactionCount = updatedTransactions.length;
+  const avgTransaction = Math.round(
+    (totalCredit + totalDebit) / transactionCount,
+  );
+  const categoryBreakdown = updatedTransactions.reduce((acc, txn) => {
+    if (!acc.hasOwnProperty(txn.category)) acc[txn.category] = txn.amount;
+    else acc[txn.category] = acc[txn.category]+txn.amount;
+    return acc;
+  }, {});
+  const highestTransaction = updatedTransactions.toSorted((a,b)=> b.amount-a.amount)
+  const allAbove100 = updatedTransactions.every((txn) => txn.amount > 100);
+  const hasLargeTransaction = updatedTransactions.some(
+    (txn) => txn.amount >= 5000,
+  );
+  const freqContact = updatedTransactions.reduce((acc, txn) => {
+    if (!acc.hasOwnProperty(txn.to)) acc[txn.to] = 1
+    else acc[txn.to] += 1;
+    return acc;
+  }, {});
+
+  const ans = Object.entries(freqContact).sort((a, b) => b[1] - a[1]);
+
+  return { totalCredit, totalDebit, netBalance, transactionCount, avgTransaction, highestTransaction: highestTransaction[0], categoryBreakdown, frequentContact: ans[0][0], allAbove100, hasLargeTransaction}
 }

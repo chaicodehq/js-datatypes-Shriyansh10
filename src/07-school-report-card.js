@@ -42,4 +42,44 @@
  */
 export function generateReportCard(student) {
   // Your code here
+  if(student===null || typeof student!='object' || Array.isArray(student) || typeof student.name !='string' || student.name.length==0 || student.marks===null || typeof student.marks!='object' || Array.isArray(student.marks) || Object.keys(student.marks).length==0 ) return null
+  for(let i of Object.values(student.marks)){
+    if(Number.isNaN(Number(i)) || i<0 || i>100) return null
+  }
+  
+  let subjects = Object.entries(student.marks);
+  let totalSubjects = Object.values(student.marks).length;
+  let totalMarks = Object.values(student.marks).reduce((acc, mark) => (acc+mark), 0);
+  let percentage = parseFloat(((totalMarks/(totalSubjects*100))*100).toFixed(2));
+  const highest = {
+    subject: '',
+    marks: -Infinity
+  }
+  const lowest = {
+    subject: '',
+    marks: Infinity
+  }
+  subjects.map((sub)=> {
+    if(highest.marks<sub[1]) {
+      highest.subject = sub[0];
+      highest.marks = sub[1];
+    }
+  })
+  subjects.map((sub)=> {
+    if(lowest.marks>sub[1]) {
+      lowest.subject = sub[0];
+      lowest.marks = sub[1];
+    }
+  })
+  let passedSubjects = subjects.filter((sub) => sub[1]>=40)
+  let failedSubjects = subjects.filter((sub) => sub[1]<40)
+  let grade;
+  if(percentage>=90) grade = 'A+'
+  else if(percentage>=80) grade = 'A'
+  else if(percentage>=70) grade = 'B'
+  else if(percentage>=60) grade = 'C'
+  else if(percentage>=40) grade = 'D'
+  else grade = 'F'
+  return { name: student.name, totalMarks, percentage, grade, highestSubject: highest.subject, lowestSubject: lowest.subject, passedSubjects: Array.from(passedSubjects.map((sub)=> sub[0])), failedSubjects: Array.from(failedSubjects.map((sub)=> sub[0])), subjectCount: totalSubjects }
 }
+
